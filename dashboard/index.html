@@ -87,7 +87,7 @@ function lineChart(id,entries){
 function barChart(id,entries,format){
   const el=document.getElementById(id);if(!entries.length){emptyChart(id,'No chart data.');return;}
   const w=680,rowH=42,h=Math.max(220,entries.length*rowH+26),p={l:145,r:85,t:12,b:8},s=baseSvg(el,w,h),max=Math.max(1,...entries.map(d=>d.value));
-  entries.forEach((d,i)=>{const y=p.t+i*rowH+5,bw=(w-p.l-p.r)*(d.value/max);s.append(svgNode('text',{x:p.l-12,y:y+17,'text-anchor':'end',fill:'#586477','font-size':'12'},d.label.length>22?d.label.slice(0,21)+'…':d.label));s.append(svgNode('rect',{x:p.l,y:y,width:w-p.l-p.r,height:20,rx:5,fill:'#edf1f7'}));s.append(svgNode('rect',{x:p.l,y:y,width:Math.max(2,bw),height:20,rx:5,fill:'#5485c4'}));s.append(svgNode('text',{x:w-p.r+8,y:y+15,fill:'#586477','font-size':'11'},format(d.value));});
+  entries.forEach((d,i)=>{const y=p.t+i*rowH+5,bw=(w-p.l-p.r)*(d.value/max);s.append(svgNode('text',{x:p.l-12,y:y+17,'text-anchor':'end',fill:'#586477','font-size':'12'},d.label.length>22?d.label.slice(0,21)+'…':d.label));s.append(svgNode('rect',{x:p.l,y:y,width:w-p.l-p.r,height:20,rx:5,fill:'#edf1f7'}));s.append(svgNode('rect',{x:p.l,y:y,width:Math.max(2,bw),height:20,rx:5,fill:'#5485c4'}));s.append(svgNode('text',{x:w-p.r+8,y:y+15,fill:'#586477','font-size':'11'},format(d.value)));});
 }
 function addTableRows(id,rows,emptyText){const body=document.getElementById(id);body.replaceChildren();if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=3;td.textContent=emptyText;tr.append(td);body.append(tr);return;}rows.forEach(cells=>{const tr=document.createElement('tr');cells.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td);});body.append(tr);});}
 function render(rows){
