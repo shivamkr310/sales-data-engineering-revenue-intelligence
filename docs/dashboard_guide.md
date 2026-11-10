@@ -1,46 +1,59 @@
-# Looker Studio dashboard guide
+# Looker Studio revenue dashboard guide
 
-## Connect a data source
+This guide builds a Looker Studio report on the BigQuery table `sales_analytics.sales_mart`. The repository contains the data model and build instructions; a live report must be created and shared from the account that owns the Google Cloud project.
 
-### BigQuery option
+## Connect BigQuery
+
 1. Open Looker Studio and create a blank report.
-2. Add data → BigQuery.
-3. Select your Google Cloud project.
-4. Select dataset `sales_analytics` and table `sales_mart`.
-5. Add the data source to the report.
+2. Choose **Add data → BigQuery**.
+3. Select the Google Cloud project and `sales_analytics` dataset.
+4. Select `sales_mart` and add it to the report.
+5. Confirm `month_start` is a Date field and amount/revenue fields are numeric.
 
-### CSV option
-1. Run the local pipeline.
-2. In Looker Studio, add data → File Upload (if available in your account).
-3. Upload `data/processed/sales_mart.csv`.
-4. Confirm the field types before building charts.
+## Scorecards
 
-## Recommended dashboard layout
+| KPI | Metric | Aggregation |
+|---|---|---|
+| Won revenue | `won_revenue` | SUM |
+| Opportunity value | `total_pipeline_value` | SUM |
+| Opportunities | `opportunity_count` | SUM |
+| Won opportunities | `opportunity_count` filtered to status = Won | SUM |
 
-### Header KPI scorecards
-Create calculated fields or scorecards for:
-- **Won Revenue:** `SUM(won_revenue)`
-- **Pipeline Value:** `SUM(total_pipeline_value)`
-- **Opportunities:** `SUM(opportunity_count)`
-- **Average Deal Size:** `AVG(average_deal_size)`
+Create a calculated field for **Closed-deal win rate**:
 
-For win rate, use a detail-level source or create a separate summary query: `won opportunities / all closed opportunities`. Do not calculate win rate by averaging grouped percentages.
+```text
+SUM(CASE WHEN status = "Won" THEN opportunity_count ELSE 0 END)
+/
+SUM(CASE WHEN status IN ("Won", "Lost") THEN opportunity_count ELSE 0 END)
+```
 
-### Charts
-1. Time series: `created_month` vs `SUM(won_revenue)`.
-2. Bar chart: `sales_rep` vs `SUM(won_revenue)`.
-3. Bar chart: `region` vs `SUM(total_pipeline_value)`.
-4. Bar chart: `lead_source` vs `SUM(opportunity_count)`.
-5. Table: `deal_stage`, `status`, `opportunity_count`, `total_pipeline_value`, `won_revenue`.
+Create a weighted **Average deal size** field rather than averaging the pre-aggregated average:
 
-### Filters
-Add controls for:
-- created month
-- region
-- lead source
-- sales representative
-- deal stage
+```text
+SUM(total_pipeline_value) / SUM(opportunity_count)
+```
 
-## Dashboard validation
+Format win rate as a percentage and financial fields as USD currency.
 
-Compare dashboard totals with the SQL reconciliation query in `sql/02_data_quality_checks.sql`. Validate date ranges and aggregation grain before presenting the dashboard as accurate.
+## Charts
+
+1. **Monthly revenue trend:** Time series; date = `month_start`; metric = SUM(`won_revenue`).
+2. **Revenue by sales representative:** Bar chart; dimension = `sales_rep`; metric = SUM(`won_revenue`).
+3. **Opportunity value by region:** Bar chart; dimension = `region`; metric = SUM(`total_pipeline_value`).
+4. **Opportunity mix by lead source:** Bar chart; dimension = `lead_source`; metric = SUM(`opportunity_count`).
+5. **Stage/status detail:** Table with `deal_stage`, `status`, SUM(`opportunity_count`), SUM(`total_pipeline_value`), and SUM(`won_revenue`).
+
+## Filters
+
+Add controls for `month_start`, `region`, `lead_source`, `sales_rep`, `deal_stage`, and `status`.
+
+## Validate before sharing
+
+- Compare totals with the BigQuery quality and reconciliation SQL.
+- Use Won + Lost opportunities as the closed-deal win-rate denominator; exclude Open opportunities.
+- Do not use AVG(`average_deal_size`) on the grouped mart; use the weighted formula above.
+- Keep the synthetic-data notice visible in the report description.
+
+## Optional CSV-only demo
+
+Run `python -m src.run_pipeline` and connect `data/processed/sales_mart.csv` using the file-upload connector available in your Looker Studio account. Confirm numeric and date field types manually.

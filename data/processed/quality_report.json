@@ -5,6 +5,7 @@
   "rows_before_validation": 5000,
   "invalid_rows_excluded": 15,
   "cleaned_rows": 4985,
+  "sales_mart_rows": 3932,
   "rows_removed_total": 115,
   "remaining_missing_required_values": {
     "transaction_id": 0,
@@ -12,5 +13,10 @@
     "created_date": 0,
     "amount": 0
   },
-  "synthetic_data_notice": "All records are synthetic; metrics describe this generated dataset only."
+  "synthetic_data_notice": "All records are synthetic; metrics describe this generated dataset only.",
+  "validation_rules": {
+    "amount_must_be_positive": true,
+    "transaction_id_deduplication": "keep_last_record",
+    "non_critical_dimensions": "fill_with_Unknown"
+  }
 }
