@@ -28,7 +28,7 @@ def transform_sales_data(raw: pd.DataFrame):
         if col in df.columns:
             df[col] = df[col].astype("string").str.strip()
 
-    for col in ["region", "lead_source", "product", "deal_stage", "status"]:
+    for col in ["sales_rep", "region", "lead_source", "product", "deal_stage", "status"]:
         df[col] = df[col].str.title()
 
     df["created_date"] = pd.to_datetime(df["created_date"], errors="coerce")
@@ -54,7 +54,6 @@ def transform_sales_data(raw: pd.DataFrame):
     invalid_rows_excluded = int((~valid_mask).sum())
     df = df.loc[valid_mask].copy()
 
-    # Non-critical dimensions are retained with an explicit fallback label.
     for col in ["sales_rep", "region", "lead_source", "product", "deal_stage"]:
         df[col] = df[col].fillna("Unknown")
     if "email" in df.columns:

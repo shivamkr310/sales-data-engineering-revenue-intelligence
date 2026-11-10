@@ -1,4 +1,6 @@
 import pandas as pd
+import pytest
+
 from src.transform import transform_sales_data
 
 
@@ -27,6 +29,14 @@ def sample_data():
             "created_date": "2025-01-07", "close_date": None,
             "amount": "-5", "probability": "0.4", "status": "open",
             "email": "b@example.test"
+        },
+        {
+            "transaction_id": "T3", "customer_id": "C3", "lead_id": "L3",
+            "sales_rep": "rep three", "region": "west", "lead_source": "email",
+            "product": "crm", "deal_stage": "proposal",
+            "created_date": "2025-01-08", "close_date": None,
+            "amount": "0", "probability": "0.2", "status": "open",
+            "email": "c@example.test"
         }
     ])
 
@@ -36,10 +46,24 @@ def test_deduplication_and_validation():
     assert len(cleaned) == 1
     assert cleaned.iloc[0]["transaction_id"] == "T1"
     assert report["duplicate_rows_removed"] == 1
-    assert report["invalid_rows_excluded"] == 1
+    assert report["invalid_rows_excluded"] == 2
+    assert report["cleaned_rows"] == 1
+    assert report["sales_mart_rows"] == 1
 
 
-def test_won_revenue():
+def test_won_revenue_and_normalization():
     cleaned, _, _ = transform_sales_data(sample_data())
     assert float(cleaned.iloc[0]["revenue"]) == 1050.0
     assert cleaned.iloc[0]["region"] == "North"
+    assert cleaned.iloc[0]["sales_rep"] == "Rep One"
+
+
+def test_mart_contains_month_start_date():
+    _, mart, _ = transform_sales_data(sample_data())
+    assert str(mart.iloc[0]["month_start"].date()) == "2025-01-01"
+
+
+def test_missing_required_column_raises_clear_error():
+    frame = sample_data().drop(columns=["transaction_id"])
+    with pytest.raises(ValueError, match="transaction_id"):
+        transform_sales_data(frame)
