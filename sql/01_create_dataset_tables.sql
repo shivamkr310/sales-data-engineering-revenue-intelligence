@@ -1,38 +1,43 @@
--- Run in BigQuery Studio after replacing YOUR_PROJECT_ID.
-CREATE SCHEMA IF NOT EXISTS `YOUR_PROJECT_ID.sales_analytics`;
+-- BigQuery Standard SQL. Replace YOUR_PROJECT_ID before execution.
+CREATE SCHEMA IF NOT EXISTS `YOUR_PROJECT_ID.sales_analytics`
+OPTIONS(location = "US");
 
--- Reference table definitions. The Python BigQuery uploader uses autodetect;
--- these DDL statements document the intended logical schema.
 CREATE TABLE IF NOT EXISTS `YOUR_PROJECT_ID.sales_analytics.cleaned_sales` (
-  transaction_id STRING,
-  customer_id STRING,
+  transaction_id STRING NOT NULL,
+  customer_id STRING NOT NULL,
   lead_id STRING,
   sales_rep STRING,
   region STRING,
   lead_source STRING,
   product STRING,
   deal_stage STRING,
-  created_date TIMESTAMP,
-  close_date TIMESTAMP,
-  amount FLOAT64,
+  created_date DATE NOT NULL,
+  close_date DATE,
+  amount NUMERIC NOT NULL,
   probability FLOAT64,
   status STRING,
   email STRING,
-  revenue FLOAT64,
+  revenue NUMERIC,
   created_month STRING,
+  month_start DATE,
   created_year INT64
-);
+)
+PARTITION BY DATE_TRUNC(created_date, MONTH)
+CLUSTER BY region, lead_source, sales_rep;
 
 CREATE TABLE IF NOT EXISTS `YOUR_PROJECT_ID.sales_analytics.sales_mart` (
   created_month STRING,
+  month_start DATE NOT NULL,
   region STRING,
   lead_source STRING,
   sales_rep STRING,
   deal_stage STRING,
   status STRING,
   opportunity_count INT64,
-  total_pipeline_value FLOAT64,
-  won_revenue FLOAT64,
-  average_deal_size FLOAT64,
+  total_pipeline_value NUMERIC,
+  won_revenue NUMERIC,
+  average_deal_size NUMERIC,
   average_probability FLOAT64
-);
+)
+PARTITION BY month_start
+CLUSTER BY region, lead_source, sales_rep;
