@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue Intelligence | Sales Analytics</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#18212f;background:#f4f6fa;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1280px;margin:auto;padding:28px 24px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:26px;line-height:1.2;margin:0 0 8px}.sub{margin:0;color:#667085;font-size:14px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.file{display:inline-flex;align-items:center;background:#fff;border:1px solid #d8deea;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:650;cursor:pointer}.file input{display:none}
+#status{font-size:12px;color:#667085;max-width:300px}.notice{background:#fff8e8;border:1px solid #f2dfb7;color:#75551b;padding:11px 14px;border-radius:10px;font-size:12px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.card{background:#fff;border:1px solid #e4e8f0;border-radius:14px;padding:17px;box-shadow:0 2px 8px rgba(21,34,50,.03)}.klabel{font-size:12px;color:#667085;margin-bottom:10px}.value{font-size:25px;font-weight:730;letter-spacing:-.4px}.hint{font-size:11px;color:#7a8494;margin-top:7px}
+.charts{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}.chart-card{background:#fff;border:1px solid #e4e8f0;border-radius:14px;padding:18px;min-width:0}.chart-card h2,.table-card h2{font-size:15px;margin:0 0 4px}.chart-note{font-size:11px;color:#7a8494;margin:0 0 12px}.chart{width:100%;min-height:240px;overflow:hidden}.chart svg{width:100%;height:auto;display:block}.empty{color:#7a8494;font-size:13px;padding:64px 10px;text-align:center}
+.bottom{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}.table-card{background:#fff;border:1px solid #e4e8f0;border-radius:14px;padding:18px;overflow:auto}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}th,td{text-align:left;padding:10px 9px;border-bottom:1px solid #edf0f5}th{font-weight:650;color:#687385}td:last-child,th:last-child{text-align:right}.pill{display:inline-block;padding:4px 8px;border-radius:30px;background:#edf4ff;color:#315f9c;font-size:11px}
+footer{font-size:11px;color:#8791a1;margin-top:18px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.charts,.bottom{grid-template-columns:1fr}}
+@media(max-width:480px){.wrap{padding:20px 14px}.grid{gap:9px}.card{padding:13px}.value{font-size:20px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>Revenue Intelligence</h1><p class="sub">Sales pipeline, won revenue and team performance</p></div>
+  <div class="actions"><label class="file">Select sales_mart.csv<input id="csvFile" type="file" accept=".csv,text/csv"></label><span id="status">Run the ETL pipeline, then select data/processed/sales_mart.csv</span></div>
+</header>
+<div class="notice">Portfolio demo using synthetic CRM data only. Metrics describe the selected dataset; they are not real company or client results.</div>
+<section class="grid" aria-label="Key performance indicators">
+  <article class="card"><div class="klabel">Won revenue</div><div class="value" id="revenue">—</div><div class="hint">Sum of won deal value</div></article>
+  <article class="card"><div class="klabel">Pipeline value</div><div class="value" id="pipeline">—</div><div class="hint">Won, lost and open opportunity value</div></article>
+  <article class="card"><div class="klabel">Opportunities</div><div class="value" id="opportunities">—</div><div class="hint">Distinct opportunity records</div></article>
+  <article class="card"><div class="klabel">Closed-deal win rate</div><div class="value" id="winrate">—</div><div class="hint">Won ÷ (Won + Lost); open deals excluded</div></article>
+</section>
+<section class="charts">
+  <article class="chart-card"><h2>Monthly won revenue</h2><p class="chart-note">Revenue trend by opportunity creation month</p><div class="chart" id="monthly"><div class="empty">Upload the sales mart CSV to render this chart.</div></div></article>
+  <article class="chart-card"><h2>Pipeline by region</h2><p class="chart-note">Total opportunity value across all stages</p><div class="chart" id="regions"><div class="empty">Waiting for data…</div></div></article>
+</section>
+<section class="charts">
+  <article class="chart-card"><h2>Won revenue by sales representative</h2><p class="chart-note">Sales team contribution</p><div class="chart" id="reps"><div class="empty">Waiting for data…</div></div></article>
+  <article class="table-card"><h2>Opportunity status</h2><p class="chart-note">Distribution of pipeline outcomes</p><table><thead><tr><th>Status</th><th>Opportunities</th><th>Share</th></tr></thead><tbody id="statusRows"><tr><td colspan="3">Upload a CSV to see status mix.</td></tr></tbody></table></article>
+</section>
+<section class="bottom">
+  <article class="table-card"><h2>Pipeline by deal stage</h2><p class="chart-note">Opportunity count and value at each stage</p><table><thead><tr><th>Deal stage</th><th>Deals</th><th>Pipeline value</th></tr></thead><tbody id="stageRows"><tr><td colspan="3">Waiting for data…</td></tr></tbody></table></article>
+  <article class="table-card"><h2>How the metrics are calculated</h2><table><tbody>
+    <tr><th>Won revenue</th><td>Sum of won_revenue</td></tr>
+    <tr><th>Pipeline value</th><td>Sum of total_pipeline_value</td></tr>
+    <tr><th>Opportunities</th><td>Sum of opportunity_count</td></tr>
+    <tr><th>Win rate</th><td>Won opportunities ÷ (Won + Lost opportunities)</td></tr>
+    <tr><th>Data grain</th><td>Month × region × source × rep × stage × status</td></tr>
+  </tbody></table></article>
+</section>
+<footer id="foot">No file selected. Data is processed in your browser and is not uploaded to a server.</footer>
+</div>
+<script>
+const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n)||0);
+const number = n => new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(Number(n)||0);
+function parseCSV(text){
+  const rows=[];let row=[],field='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}
+    else if(c===','&&!quoted){row.push(field);field='';}
+    else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field);field='';if(row.some(v=>v!==''))rows.push(row);row=[];}
+    else field+=c;
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  const headers=rows.shift().map(x=>x.trim());
+  return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??'').trim()])));
+}
+function svgNode(tag,attrs={},text=''){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+  if(text!=='')el.textContent=text;return el;
+}
+function baseSvg(container,w=680,h=260){const s=svgNode('svg',{viewBox:`0 0 ${w} ${h}`,role:'img','aria-label':'Data chart'});container.replaceChildren(s);return s;}
+function emptyChart(id,msg){const el=document.getElementById(id),div=document.createElement('div');div.className='empty';div.textContent=msg;el.replaceChildren(div);}
+function lineChart(id,entries){
+  if(!entries.length){emptyChart(id,'No monthly revenue data.');return;}
+  const el=document.getElementById(id),w=680,h=260,p={l:62,r:18,t:15,b:48},s=baseSvg(el,w,h),max=Math.max(1,...entries.map(d=>d.value));
+  for(let i=0;i<5;i++){const y=p.t+(h-p.t-p.b)*i/4;s.append(svgNode('line',{x1:p.l,y1:y,x2:w-p.r,y2:y,stroke:'#e9edf3'}));s.append(svgNode('text',{x:p.l-9,y:y+4,'text-anchor':'end',fill:'#758195','font-size':'11'},money(max*(1-i/4))));}
+  const pts=entries.map((d,i)=>[p.l+(w-p.l-p.r)*(entries.length===1?0.5:i/(entries.length-1)),p.t+(h-p.t-p.b)*(1-d.value/max)]);
+  s.append(svgNode('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#386cb5','stroke-width':'3','stroke-linecap':'round','stroke-linejoin':'round'}));
+  pts.forEach(([x,y])=>s.append(svgNode('circle',{cx:x,cy:y,r:3.5,fill:'#386cb5'})));
+  entries.forEach((d,i)=>{if(i%Math.max(1,Math.ceil(entries.length/8))===0||i===entries.length-1)s.append(svgNode('text',{x:pts[i][0],y:h-19,'text-anchor':'middle',fill:'#758195','font-size':'10'},d.label));});
+}
+function barChart(id,entries,format){
+  const el=document.getElementById(id);if(!entries.length){emptyChart(id,'No chart data.');return;}
+  const w=680,rowH=42,h=Math.max(220,entries.length*rowH+26),p={l:145,r:85,t:12,b:8},s=baseSvg(el,w,h),max=Math.max(1,...entries.map(d=>d.value));
+  entries.forEach((d,i)=>{const y=p.t+i*rowH+5,bw=(w-p.l-p.r)*(d.value/max);s.append(svgNode('text',{x:p.l-12,y:y+17,'text-anchor':'end',fill:'#586477','font-size':'12'},d.label.length>22?d.label.slice(0,21)+'…':d.label));s.append(svgNode('rect',{x:p.l,y:y,width:w-p.l-p.r,height:20,rx:5,fill:'#edf1f7'}));s.append(svgNode('rect',{x:p.l,y:y,width:Math.max(2,bw),height:20,rx:5,fill:'#5485c4'}));s.append(svgNode('text',{x:w-p.r+8,y:y+15,fill:'#586477','font-size':'11'},format(d.value));});
+}
+function addTableRows(id,rows,emptyText){const body=document.getElementById(id);body.replaceChildren();if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=3;td.textContent=emptyText;tr.append(td);body.append(tr);return;}rows.forEach(cells=>{const tr=document.createElement('tr');cells.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td);});body.append(tr);});}
+function render(rows){
+  const req=['created_month','region','sales_rep','deal_stage','status','opportunity_count','total_pipeline_value','won_revenue'];
+  const missing=req.filter(k=>!(k in (rows[0]||{})));if(missing.length)throw new Error('CSV is missing columns: '+missing.join(', '));
+  const sum=k=>rows.reduce((a,r)=>a+(Number(r[k])||0),0);
+  const won=rows.filter(r=>r.status==='Won').reduce((a,r)=>a+(Number(r.opportunity_count)||0),0);
+  const lost=rows.filter(r=>r.status==='Lost').reduce((a,r)=>a+(Number(r.opportunity_count)||0),0);
+  const total=sum('opportunity_count'),pipeline=sum('total_pipeline_value'),revenue=sum('won_revenue');
+  document.getElementById('revenue').textContent=money(revenue);document.getElementById('pipeline').textContent=money(pipeline);document.getElementById('opportunities').textContent=number(total);document.getElementById('winrate').textContent=(won+lost?100*won/(won+lost):0).toFixed(1)+'%';
+  const monthly=new Map(),regions=new Map(),reps=new Map(),statuses=new Map(),stages=new Map();
+  rows.forEach(r=>{const count=Number(r.opportunity_count)||0;monthly.set(r.created_month,(monthly.get(r.created_month)||0)+(Number(r.won_revenue)||0));regions.set(r.region,(regions.get(r.region)||0)+(Number(r.total_pipeline_value)||0));reps.set(r.sales_rep,(reps.get(r.sales_rep)||0)+(Number(r.won_revenue)||0));statuses.set(r.status,(statuses.get(r.status)||0)+count);const old=stages.get(r.deal_stage)||{count:0,value:0};old.count+=count;old.value+=Number(r.total_pipeline_value)||0;stages.set(r.deal_stage,old);});
+  lineChart('monthly',[...monthly].sort((a,b)=>a[0].localeCompare(b[0])).map(([label,value])=>({label,value})));
+  barChart('regions',[...regions].map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value),money);
+  barChart('reps',[...reps].map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value),money);
+  const statusRows=[...statuses].map(([s,n])=>[s,number(n),total?(100*n/total).toFixed(1)+'%':'0%']);addTableRows('statusRows',statusRows,'No status rows.');
+  const stageRows=[...stages].map(([s,v])=>[s,number(v.count),money(v.value)]).sort((a,b)=>Number(b[1].replaceAll(',',''))-Number(a[1].replaceAll(',','')));addTableRows('stageRows',stageRows,'No stages found.');
+  document.getElementById('foot').textContent=`Loaded ${number(rows.length)} aggregated rows. Total opportunity count: ${number(total)}. Data processed locally in this browser; no upload to a server.`;
+}
+document.getElementById('csvFile').addEventListener('change',async e=>{
+  const file=e.target.files[0];if(!file)return;const status=document.getElementById('status');status.textContent='Reading '+file.name+'…';
+  try{const rows=parseCSV(await file.text());render(rows);status.textContent=file.name+' · '+number(rows.length)+' rows';}
+  catch(err){status.textContent='Could not read file';alert(err.message);}
+});
+</script>
+</body>
+</html>

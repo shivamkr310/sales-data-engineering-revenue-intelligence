@@ -86,6 +86,10 @@ python -m pytest -q
 
 Outputs are written to `data/raw/` and `data/processed/`.
 
+## Local interactive dashboard
+
+A browser-based dashboard is included as a no-cloud preview. First run the ETL pipeline, then open `dashboard/index.html` in a browser and select `data/processed/sales_mart.csv`. It renders revenue and pipeline KPIs, monthly revenue, regional pipeline, sales-representative revenue, and stage/status tables. The CSV is read in the browser and is not sent to a server.
+
 ## BigQuery integration (optional)
 
 ### One-time setup

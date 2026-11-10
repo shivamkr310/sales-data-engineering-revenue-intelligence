@@ -1,4 +1,15 @@
-# Looker Studio revenue dashboard guide
+# Revenue dashboard guide
+
+## Local interactive dashboard (no cloud account required)
+
+1. Run `python -m src.run_pipeline` from the repository root.
+2. Open `dashboard/index.html` in a modern browser.
+3. Select `data/processed/sales_mart.csv` using the file picker.
+4. Review the KPI cards, monthly won-revenue trend, pipeline by region, won revenue by representative, and stage/status tables.
+
+The browser reads the CSV locally; it is not uploaded to a server. The data is synthetic.
+
+## Looker Studio dashboard guide
 
 This guide builds a Looker Studio report on the BigQuery table `sales_analytics.sales_mart`. The repository contains the data model and build instructions; a live report must be created and shared from the account that owns the Google Cloud project.
 
