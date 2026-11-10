@@ -1,6 +1,6 @@
 -- Rebuild the reporting mart from the opportunity-level BigQuery table.
 CREATE OR REPLACE TABLE `YOUR_PROJECT_ID.sales_analytics.sales_mart`
-PARTITION BY month_start
+PARTITION BY DATE_TRUNC(month_start, MONTH)
 CLUSTER BY region, lead_source, sales_rep AS
 SELECT
   FORMAT_DATE('%Y-%m', DATE_TRUNC(created_date, MONTH)) AS created_month,

@@ -39,5 +39,5 @@ CREATE TABLE IF NOT EXISTS `YOUR_PROJECT_ID.sales_analytics.sales_mart` (
   average_deal_size NUMERIC,
   average_probability FLOAT64
 )
-PARTITION BY month_start
+PARTITION BY DATE_TRUNC(month_start, MONTH)
 CLUSTER BY region, lead_source, sales_rep;
